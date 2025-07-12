@@ -1,52 +1,52 @@
 # 1. Fetch rclone versions
-$html = Invoke-WebRequest "https://downloads.rclone.org/"
-$versions = [regex]::Matches($html.Content, '>(v\d+\.\d+\.\d+)/<') | ForEach-Object { $_.Groups[1].Value }
-$versions = $versions | Sort-Object { [version]($_ -replace '^v','') }
+$HTML = Invoke-WebRequest "https://downloads.rclone.org/"
+$VERSIONS = [regex]::Matches($HTML.Content, '>(v\d+\.\d+\.\d+)/<') | ForEach-Object { $_.Groups[1].Value }
+$VERSIONS = $VERSIONS | Sort-Object { [version]($_ -replace '^v','') }
 
 # 2. Show menu (option 0 is "latest")
 Write-Host "Available rclone versions:"
-Write-Host "0: Latest ($($versions[-1]))"
-for ($i=0; $i -lt $versions.Count; $i++) {
-    Write-Host "$($i+1): $($versions[$i])"
+Write-Host "0: Latest ($($VERSIONS[-1]))"
+for ($I=0; $I -lt $VERSIONS.Count; $I++) {
+    Write-Host "$($I+1): $($VERSIONS[$I])"
 }
 
-$selection = Read-Host "Enter the number of the version you want to install (0 for latest, blank for latest)"
-if ([string]::IsNullOrWhiteSpace($selection) -or $selection -eq "0") {
-    $rcloneVersion = $versions[-1]
+$SELECTION = Read-Host "Enter the number of the version you want to install (0 for latest, blank for latest)"
+if ([string]::IsNullOrWhiteSpace($SELECTION) -or $SELECTION -eq "0") {
+    $RCLONE_VERSION = $VERSIONS[-1]
 } else {
-    $index = [int]$selection - 1
-    if ($index -lt 0 -or $index -ge $versions.Count) {
+    $INDEX = [int]$SELECTION - 1
+    if ($INDEX -lt 0 -or $INDEX -ge $VERSIONS.Count) {
         Write-Host "Invalid selection. Exiting."
         exit 1
     }
-    $rcloneVersion = $versions[$index]
+    $RCLONE_VERSION = $VERSIONS[$INDEX]
 }
-Write-Host "Selected version: $rcloneVersion"
+Write-Host "Selected version: $RCLONE_VERSION"
 
 # 3. Prepare destination folder
-$binPath = "$HOME\.local\bin"
-if (!(Test-Path -Path $binPath)) {
-    New-Item -ItemType Directory -Path $binPath -Force | Out-Null
+$BINPATH = "$HOME\.local\bin"
+if (!(Test-Path -Path $BINPATH)) {
+    New-Item -ItemType Directory -Path $BINPATH -Force | Out-Null
 }
 
 # 4. Add $HOME\.local\bin to user PATH if not already present
-$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-if ($currentPath -notlike "*$binPath*") {
-    [Environment]::SetEnvironmentVariable("PATH", "$currentPath;$binPath", "User")
-    Write-Host "Added $binPath to user PATH. You may need to restart your terminal."
+$CURRENTPATH = [Environment]::GetEnvironmentVariable("PATH", "User")
+if ($CURRENTPATH -notlike "*$BINPATH*") {
+    [Environment]::SetEnvironmentVariable("PATH", "$CURRENTPATH;$BINPATH", "User")
+    Write-Host "Added $BINPATH to user PATH. You may need to restart your terminal."
 }
 
 # 5. Download and extract rclone
-$rcloneUrl = "https://downloads.rclone.org/$rcloneVersion/rclone-$rcloneVersion-windows-amd64.zip"
-Write-Host "Downloading rclone from: $rcloneUrl"
-$rcloneZip = Join-Path $binPath "rclone-$rcloneVersion-windows-amd64.zip"
+$RCLONE_URL = "https://downloads.rclone.org/$RCLONE_VERSION/rclone-$RCLONE_VERSION-windows-amd64.zip"
+Write-Host "Downloading rclone from: $RCLONE_URL"
+$RCLONE_ZIP = Join-Path $BINPATH "rclone-$RCLONE_VERSION-windows-amd64.zip"
 
-Invoke-WebRequest $rcloneUrl -OutFile $rcloneZip
-Expand-Archive -Path $rcloneZip -DestinationPath $binPath -Force
+Invoke-WebRequest $RCLONE_URL -OutFile $RCLONE_ZIP
+Expand-Archive -Path $RCLONE_ZIP -DestinationPath $BINPATH -Force
 
 # 6. Cleanup: Copy rclone.exe to bin, remove folder/zip
-Copy-Item "$binPath\rclone-$rcloneVersion-windows-amd64\rclone.exe" $binPath -Force
-Remove-Item "$binPath\rclone-$rcloneVersion-windows-amd64" -Recurse -Force
-Remove-Item "$binPath\rclone-$rcloneVersion-windows-amd64.zip" -Force
+Copy-Item "$BINPATH\rclone-$RCLONE_VERSION-windows-amd64\rclone.exe" $BINPATH -Force
+Remove-Item "$BINPATH\rclone-$RCLONE_VERSION-windows-amd64" -Recurse -Force
+Remove-Item "$BINPATH\rclone-$RCLONE_VERSION-windows-amd64.zip" -Force
 
-Write-Host "All done! rclone $rcloneVersion should now be extracted in $binPath"
+Write-Host "All done! rclone $RCLONE_VERSION should now be extracted in $BINPATH"
