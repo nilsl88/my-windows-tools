@@ -1,3 +1,12 @@
+<#
+    This PowerShell script will:
+    - Fetch all available rclone versions from the official download site
+    - Prompt you to select a version (or pick the latest by default)
+    - Download and extract the selected rclone Windows binary to $HOME\.local\bin
+    - Add $HOME\.local\bin to your user PATH if it's not already there
+    - Move rclone.exe to $HOME\.local\bin and clean up any extracted folders and zip files
+#>
+
 # 1. Fetch rclone versions
 $HTML = Invoke-WebRequest "https://downloads.rclone.org/"
 $VERSIONS = [regex]::Matches($HTML.Content, '>(v\d+\.\d+\.\d+)/<') | ForEach-Object { $_.Groups[1].Value }
